@@ -1,109 +1,122 @@
 #include "pch.h"
 
-#include "GeodataLoader.h"
+#include "GeodataEntityFactory.h"
 #include "LoadingSystem.h"
 #include "UnrealLoader.h"
 
-LoadingSystem::LoadingSystem(RenderingContext &rendering_context,
+LoadingSystem::LoadingSystem(GeodataContext &geodata_context,
+                             const Renderer *renderer,
                              const std::filesystem::path &root_path,
-                             const std::vector<std::string> &maps)
-    : m_rendering_context{rendering_context} {
+                             const std::vector<std::string> &map_names)
+    : m_geodata_context{geodata_context}, m_renderer{renderer} {
 
   UnrealLoader unreal_loader{root_path};
-  GeodataLoader geodata_loader;
+  geodata::Loader geodata_loader{"geodata"};
 
-  rendering::ShaderLoader shader_loader{m_rendering_context.context, "shaders"};
-  const auto entity_shader = shader_loader.load_entity_shader("entity");
-  const auto geodata_shader = shader_loader.load_entity_shader("geodata");
+  GeodataEntityFactory geodata_entity_factory;
 
-  rendering::TextureLoader texture_loader{m_rendering_context.context,
-                                          "textures"};
-  const auto nswe_texture = texture_loader.load_texture("nswe.png");
+  std::vector<Map> maps;
+  std::vector<Entity<GeodataMesh>> geodata_entities;
 
+  for (const auto &map_name : map_names) {
+    // Load map entities.
+    auto map = unreal_loader.load_map(map_name);
+    map.name = map_name;
+    maps.push_back(map);
+
+    // Load geodata.
+    if (m_renderer == nullptr) {
+      continue;
+    }
+
+    const auto *geodata = geodata_loader.load_geodata(map_name);
+
+    if (geodata == nullptr) {
+      continue;
+    }
+
+    auto geodata_entity = geodata_entity_factory.make_entity(
+        *geodata, map.bounding_box, SURFACE_IMPORTED_GEODATA);
+
+    geodata_entities.push_back(std::move(geodata_entity));
+  }
+
+  if (m_renderer != nullptr) {
+    utils::Log(utils::LOG_INFO, "App")
+        << "Prepare maps for rendering" << std::endl;
+    m_renderer->render_maps(maps);
+    m_renderer->render_geodata(geodata_entities);
+  }
+
+  utils::Log(utils::LOG_INFO, "App")
+      << "Prepare maps for geodata building" << std::endl;
+  prebuild_maps(maps);
+}
+
+void LoadingSystem::prebuild_maps(const std::vector<Map> &maps) const {
   std::unordered_map<std::shared_ptr<EntityMesh>,
-                     std::shared_ptr<rendering::EntityMesh>>
-      mesh_cache;
+                     std::shared_ptr<geodata::Mesh>>
+      entity_mesh_cache;
 
   for (const auto &map : maps) {
-    glm::vec3 map_position{};
-
-    const auto map_entities = unreal_loader.load_map(map, map_position);
-
-    // Set initial camera position.
-    if (!map_entities.empty()) {
-      m_rendering_context.camera.set_position(
-          {map_position.x + 256.0f * 64.0f, map_position.y, 0.0f});
+    if (map.entities.empty()) {
+      continue;
     }
 
-    for (const auto &entity : map_entities) {
-      auto cached_mesh = mesh_cache.find(entity.mesh);
+    geodata::Map geodata_map{map.name, map.bounding_box};
 
-      if (cached_mesh == mesh_cache.end()) {
-        std::vector<rendering::MeshSurface> surfaces;
+    for (const auto &entity : map.entities) {
+      // Load mesh if needed.
+      auto cached_mesh = entity_mesh_cache.find(entity.mesh);
+
+      if (cached_mesh == entity_mesh_cache.end()) {
+        std::vector<geodata::Vertex> vertices;
+        std::vector<unsigned int> indices;
+        auto skipped_indices = 0;
 
         for (const auto &surface : entity.mesh->surfaces) {
-          surfaces.emplace_back(
-              surface.type,
-              rendering::Material{surface.material.color, nullptr},
-              surface.index_offset, surface.index_count);
+          if ((surface.type & (SURFACE_PASSABLE | SURFACE_BOUNDING_BOX)) != 0) {
+            skipped_indices += surface.index_count;
+            continue;
+          }
+
+          for (auto i = surface.index_offset;
+               i < (surface.index_offset + surface.index_count); ++i) {
+
+            const auto index = entity.mesh->indices[i];
+
+            vertices.push_back({entity.mesh->vertices[index].position,
+                                entity.mesh->vertices[index].normal});
+
+            indices.push_back(i - skipped_indices);
+          }
         }
 
-        std::vector<rendering::Vertex> vertices;
-
-        for (const auto &vertex : entity.mesh->vertices) {
-          vertices.push_back({vertex.position, vertex.normal, vertex.uv});
+        if (vertices.empty() || indices.empty()) {
+          entity_mesh_cache.insert({entity.mesh, nullptr});
+          continue;
         }
 
-        const std::vector<glm::mat4> &model_matrices =
-            entity.mesh->model_matrices.empty() ? std::vector{glm::mat4{1.0f}}
-                                                : entity.mesh->model_matrices;
+        const auto mesh = std::make_shared<geodata::Mesh>();
+        mesh->vertices.swap(vertices);
+        mesh->indices.swap(indices);
+        mesh->instance_matrices = entity.instance_matrices();
 
-        const auto mesh = std::make_shared<rendering::EntityMesh>(
-            m_rendering_context.context, vertices, entity.mesh->indices,
-            surfaces, model_matrices, entity.mesh->bounding_box);
-
-        cached_mesh = mesh_cache.insert({entity.mesh, mesh}).first;
+        cached_mesh = entity_mesh_cache.insert({entity.mesh, mesh}).first;
       }
 
-      rendering::Entity rendering_entity{cached_mesh->second, entity_shader,
-                                         entity.model_matrix(),
-                                         entity.wireframe};
-
-      m_rendering_context.entity_tree.add(rendering_entity);
-    }
-
-    const auto geodata_entities =
-        geodata_loader.load_geodata(map, map_position);
-
-    for (const auto &entity : geodata_entities) {
-      std::vector<rendering::GeodataBlock> blocks;
-
-      for (const auto &block : entity.mesh->blocks) {
-        blocks.push_back({
-            static_cast<std::int32_t>(block.x),
-            static_cast<std::int32_t>(block.y),
-            static_cast<std::int32_t>(block.z),
-            static_cast<std::uint16_t>(block.type),
-            block.north,
-            block.south,
-            block.west,
-            block.east,
-        });
+      if (cached_mesh->second == nullptr) {
+        continue;
       }
 
-      rendering::MeshSurface surface{
-          entity.mesh->surface.type,
-          rendering::Material{entity.mesh->surface.material.color,
-                              nswe_texture},
-          0, 0};
+      geodata::Entity geodata_entity{
+          cached_mesh->second,
+          entity.model_matrix(),
+      };
 
-      const auto mesh = std::make_shared<rendering::GeodataMesh>(
-          m_rendering_context.context, blocks, surface);
-
-      rendering::Entity rendering_entity{mesh, geodata_shader,
-                                         entity.model_matrix(), false};
-
-      m_rendering_context.entity_tree.add(rendering_entity);
+      geodata_map.add(geodata_entity);
     }
+
+    m_geodata_context.maps.push_back(std::move(geodata_map));
   }
 }

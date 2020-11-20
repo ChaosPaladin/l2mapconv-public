@@ -32,30 +32,35 @@ void RenderingSystem::frame_begin(Timestep /*frame_time*/) {
 
 void RenderingSystem::frame_end(Timestep /*frame_time*/) {
   rendering::FrameSettings settings{};
-  settings.wireframe = m_ui_context.input.wireframe;
+  settings.wireframe = m_ui_context.rendering.wireframe;
+  settings.culling = m_ui_context.rendering.culling;
 
-  if (m_ui_context.input.passable) {
+  if (m_ui_context.rendering.passable) {
     settings.surface_filter |= SURFACE_PASSABLE;
   }
 
-  if (m_ui_context.input.terrain) {
+  if (m_ui_context.rendering.terrain) {
     settings.surface_filter |= SURFACE_TERRAIN;
   }
 
-  if (m_ui_context.input.static_meshes) {
+  if (m_ui_context.rendering.static_meshes) {
     settings.surface_filter |= SURFACE_STATIC_MESH;
   }
 
-  if (m_ui_context.input.csg) {
+  if (m_ui_context.rendering.csg) {
     settings.surface_filter |= SURFACE_CSG;
   }
 
-  if (m_ui_context.input.bounding_boxes) {
+  if (m_ui_context.rendering.bounding_boxes) {
     settings.surface_filter |= SURFACE_BOUNDING_BOX;
   }
 
-  if (m_ui_context.input.geodata) {
-    settings.surface_filter |= SURFACE_GEODATA;
+  if (m_ui_context.rendering.imported_geodata) {
+    settings.surface_filter |= SURFACE_IMPORTED_GEODATA;
+  }
+
+  if (m_ui_context.rendering.exported_geodata) {
+    settings.surface_filter |= SURFACE_EXPORTED_GEODATA;
   }
 
   if (settings.wireframe) {
@@ -64,10 +69,10 @@ void RenderingSystem::frame_end(Timestep /*frame_time*/) {
     GL_CALL(glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
   }
 
-  m_ui_context.output.draws = 0;
+  m_ui_context.rendering.draws = 0;
 
   m_entity_renderer.render(m_rendering_context.entity_tree, settings,
-                           m_ui_context.output.draws);
+                           m_ui_context.rendering.draws);
 }
 
 void RenderingSystem::resize() const {

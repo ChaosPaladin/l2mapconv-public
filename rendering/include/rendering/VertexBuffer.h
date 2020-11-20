@@ -17,7 +17,7 @@ public:
         m_vertex_size{sizeof(T)} {
 
     ASSERT(!vertices.empty(), "Rendering",
-           "Vertex buffer must have at least one vertex");
+           "Vertex buffer must have at least one vertice");
   }
 
   auto data() const -> const void *;

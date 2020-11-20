@@ -24,7 +24,7 @@ public:
   explicit EntityMesh(Context &context, const std::vector<Vertex> &vertices,
                       const std::vector<std::uint32_t> &indices,
                       const std::vector<MeshSurface> &surfaces,
-                      const std::vector<glm::mat4> &model_matrices,
+                      const std::vector<glm::mat4> &instance_matrices,
                       const math::Box &bounding_box);
 
   virtual auto surfaces() const -> const std::vector<MeshSurface> & override;
@@ -39,7 +39,7 @@ private:
   math::Box m_bounding_box;
 
   auto vertex_buffers(const std::vector<Vertex> &vertices,
-                      const std::vector<glm::mat4> &model_matrices)
+                      const std::vector<glm::mat4> &instance_matrices)
       -> std::vector<VertexBuffer>;
 };
 

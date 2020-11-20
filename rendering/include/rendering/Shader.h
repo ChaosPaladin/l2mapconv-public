@@ -24,12 +24,16 @@ public:
   void bind() const;
   void unbind() const;
 
-  void load(const std::string &name, int value) const;
-  void load(const std::string &name, float value) const;
-  void load(const std::string &name, const glm::vec2 &value) const;
-  void load(const std::string &name, const glm::vec3 &value) const;
-  void load(const std::string &name, const glm::vec4 &value) const;
-  void load(const std::string &name, const glm::mat4 &value) const;
+  void load(const std::string &name, int value, bool required = true) const;
+  void load(const std::string &name, float value, bool required = true) const;
+  void load(const std::string &name, const glm::vec2 &value,
+            bool required = true) const;
+  void load(const std::string &name, const glm::vec3 &value,
+            bool required = true) const;
+  void load(const std::string &name, const glm::vec4 &value,
+            bool required = true) const;
+  void load(const std::string &name, const glm::mat4 &value,
+            bool required = true) const;
 
 private:
   Context &m_context;
@@ -38,7 +42,7 @@ private:
 
   auto compile(const std::string &source, unsigned int type) const
       -> unsigned int;
-  auto uniform_location(const std::string &name) const -> int;
+  auto uniform_location(const std::string &name, bool required) const -> int;
   void check_for_errors(unsigned int handle) const;
 };
 

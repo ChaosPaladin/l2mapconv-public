@@ -4,7 +4,7 @@
 
 namespace rendering {
 
-struct GeodataBlock {
+struct GeodataCell {
   std::int32_t x;
   std::int32_t y;
   std::int32_t z;

@@ -10,8 +10,11 @@ Mesh::Mesh(Context &context, std::size_t vertex_count,
     : m_context{context}, m_vertex_count{vertex_count},
       m_index_count{indices.size()}, m_vao{0} {
 
-  ASSERT(m_vertex_count != 0, "Rendering",
-         "Mesh must have at least one vertex");
+  ASSERT(m_vertex_count >= 3, "Rendering",
+         "Mesh must have at least 3 vertices");
+  ASSERT(indices.empty() || indices.size() >= 3, "Rendering",
+         "Mesh must have no indices or at least 3 indices");
+
   ASSERT(!vertex_buffers.empty(), "Rendering",
          "Mesh must have at least one vertex buffer");
 
@@ -39,7 +42,7 @@ Mesh::Mesh(Context &context, std::size_t vertex_count,
       GL_CALL(glVertexAttribDivisor(layout.index, layout.divisor));
     }
 
-    // Int attributes layout
+    // Int attributes layout.
     for (const auto &layout : vertex_buffer.int_layouts()) {
       GL_CALL(glEnableVertexAttribArray(layout.index));
       GL_CALL(glVertexAttribIPointer(layout.index, layout.size, layout.type,

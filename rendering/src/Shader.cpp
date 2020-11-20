@@ -67,39 +67,47 @@ void Shader::unbind() const {
   }
 }
 
-void Shader::load(const std::string &name, float value) const {
+void Shader::load(const std::string &name, float value, bool required) const {
   bind();
-  const auto location = uniform_location(name);
+  const auto location = uniform_location(name, required);
   GL_CALL(glUniform1f(location, value));
 }
 
-void Shader::load(const std::string &name, int value) const {
+void Shader::load(const std::string &name, int value, bool required) const {
   bind();
-  const auto location = uniform_location(name);
+  const auto location = uniform_location(name, required);
   GL_CALL(glUniform1i(location, value));
 }
 
-void Shader::load(const std::string &name, const glm::vec2 &value) const {
+void Shader::load(const std::string &name, const glm::vec2 &value,
+                  bool required) const {
+
   bind();
-  const auto location = uniform_location(name);
+  const auto location = uniform_location(name, required);
   GL_CALL(glUniform2f(location, value.x, value.y));
 }
 
-void Shader::load(const std::string &name, const glm::vec3 &value) const {
+void Shader::load(const std::string &name, const glm::vec3 &value,
+                  bool required) const {
+
   bind();
-  const auto location = uniform_location(name);
+  const auto location = uniform_location(name, required);
   GL_CALL(glUniform3f(location, value.x, value.y, value.z));
 }
 
-void Shader::load(const std::string &name, const glm::vec4 &value) const {
+void Shader::load(const std::string &name, const glm::vec4 &value,
+                  bool required) const {
+
   bind();
-  const auto location = uniform_location(name);
+  const auto location = uniform_location(name, required);
   GL_CALL(glUniform4f(location, value.x, value.y, value.z, value.w));
 }
 
-void Shader::load(const std::string &name, const glm::mat4 &value) const {
+void Shader::load(const std::string &name, const glm::mat4 &value,
+                  bool required) const {
+
   bind();
-  const auto location = uniform_location(name);
+  const auto location = uniform_location(name, required);
   GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value)));
 }
 
@@ -117,7 +125,9 @@ auto Shader::compile(const std::string &source, GLenum type) const
   return shader;
 }
 
-auto Shader::uniform_location(const std::string &name) const -> int {
+auto Shader::uniform_location(const std::string &name, bool required) const
+    -> int {
+
   const auto pair = m_uniform_locations.find(name);
 
   if (pair != m_uniform_locations.end()) {
@@ -126,10 +136,8 @@ auto Shader::uniform_location(const std::string &name) const -> int {
 
   GL_CALL(const auto location = glGetUniformLocation(m_program, name.c_str()));
 
-  if (location == -1) {
-    utils::Log(utils::LOG_WARN, "Rendering")
-        << "Uniform not found: " << name << std::endl;
-  }
+  ASSERT(!required || location != -1, "Rendering",
+         "Uniform not found: " << name);
 
   m_uniform_locations[name] = location;
   return location;

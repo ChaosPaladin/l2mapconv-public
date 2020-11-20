@@ -8,14 +8,14 @@ namespace rendering {
 EntityMesh::EntityMesh(Context &context, const std::vector<Vertex> &vertices,
                        const std::vector<std::uint32_t> &indices,
                        const std::vector<MeshSurface> &surfaces,
-                       const std::vector<glm::mat4> &model_matrices,
+                       const std::vector<glm::mat4> &instance_matrices,
                        const math::Box &bounding_box)
-    : m_mesh{context, vertices.size(), vertex_buffers(vertices, model_matrices),
-             indices},
-      m_surfaces{surfaces}, m_instances{model_matrices.size()},
+    : m_mesh{context, vertices.size(),
+             vertex_buffers(vertices, instance_matrices), indices},
+      m_surfaces{surfaces}, m_instances{instance_matrices.size()},
       m_bounding_box{bounding_box} {
 
-  ASSERT(!indices.empty(), "Rendering", "Mesh must have at least one index");
+  ASSERT(indices.size() >= 3, "Rendering", "Mesh must have at least 3 indices");
   ASSERT(!m_surfaces.empty(), "Rendering",
          "Mesh must have at least one surface");
   ASSERT(m_instances > 0, "Rendering",
@@ -28,8 +28,8 @@ EntityMesh::EntityMesh(Context &context, const std::vector<Vertex> &vertices,
                surface.index_offset + surface.index_count <=
                    m_mesh.index_count(),
            "Rendering", "Indices out of bounds");
-    ASSERT(surface.index_count > 0, "Rendering",
-           "Surface must have at least one index");
+    ASSERT(surface.index_count >= 3, "Rendering",
+           "Surface must have at least 3 indices");
 
     surface.m_mesh = this;
     index_count += surface.index_count;
@@ -54,7 +54,7 @@ void EntityMesh::draw(const MeshSurface &surface) const {
 }
 
 auto EntityMesh::vertex_buffers(const std::vector<Vertex> &vertices,
-                                const std::vector<glm::mat4> &model_matrices)
+                                const std::vector<glm::mat4> &instance_matrices)
     -> std::vector<VertexBuffer> {
 
   VertexBuffer vertex_buffer{vertices};
@@ -64,15 +64,16 @@ auto EntityMesh::vertex_buffers(const std::vector<Vertex> &vertices,
                              offsetof(Vertex, normal));
   vertex_buffer.float_layout(2, sizeof(Vertex::uv), offsetof(Vertex, uv));
 
-  VertexBuffer model_matrix_buffer{model_matrices};
-  model_matrix_buffer.float_layout(3, sizeof(glm::vec4), 0, 1);
-  model_matrix_buffer.float_layout(4, sizeof(glm::vec4), sizeof(glm::vec4), 1);
-  model_matrix_buffer.float_layout(5, sizeof(glm::vec4), sizeof(glm::vec4) * 2,
-                                   1);
-  model_matrix_buffer.float_layout(6, sizeof(glm::vec4), sizeof(glm::vec4) * 3,
-                                   1);
+  VertexBuffer instance_matrix_buffer{instance_matrices};
+  instance_matrix_buffer.float_layout(3, sizeof(glm::vec4), 0, 1);
+  instance_matrix_buffer.float_layout(4, sizeof(glm::vec4), sizeof(glm::vec4),
+                                      1);
+  instance_matrix_buffer.float_layout(5, sizeof(glm::vec4),
+                                      sizeof(glm::vec4) * 2, 1);
+  instance_matrix_buffer.float_layout(6, sizeof(glm::vec4),
+                                      sizeof(glm::vec4) * 3, 1);
 
-  return {vertex_buffer, model_matrix_buffer};
+  return {vertex_buffer, instance_matrix_buffer};
 }
 
 } // namespace rendering

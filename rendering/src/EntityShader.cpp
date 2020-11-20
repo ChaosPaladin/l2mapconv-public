@@ -17,15 +17,15 @@ void EntityShader::load_model_matrix(const glm::mat4 &model) const {
 }
 
 void EntityShader::load_texture_unit(int unit) const {
-  m_shader.load("u_texture", unit);
+  m_shader.load("u_texture", unit, false);
 }
 
 void EntityShader::load_color(const glm::vec3 &color) const {
-  m_shader.load("u_color", color);
+  m_shader.load("u_color", color, false);
 }
 
 void EntityShader::load_camera(const glm::vec3 &camera) const {
-  m_shader.load("u_camera", camera);
+  m_shader.load("u_camera", camera, false);
 }
 
 void EntityShader::bind() const { m_shader.bind(); }

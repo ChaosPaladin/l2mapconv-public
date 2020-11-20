@@ -1,6 +1,8 @@
 #pragma once
 
-#include "RenderingContext.h"
+#include "GeodataContext.h"
+#include "Map.h"
+#include "Renderer.h"
 #include "System.h"
 
 #include <filesystem>
@@ -9,10 +11,14 @@
 
 class LoadingSystem : public System {
 public:
-  explicit LoadingSystem(RenderingContext &rendering_context,
+  explicit LoadingSystem(GeodataContext &geodata_context,
+                         const Renderer *renderer,
                          const std::filesystem::path &root_path,
-                         const std::vector<std::string> &maps);
+                         const std::vector<std::string> &map_names);
 
 private:
-  RenderingContext &m_rendering_context;
+  GeodataContext &m_geodata_context;
+  const Renderer *m_renderer;
+
+  void prebuild_maps(const std::vector<Map> &maps) const;
 };

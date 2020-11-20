@@ -7,3 +7,6 @@
 [submodule "libs/glew"]
 	path = libs/glew
 	url = https://github.com/Perlmint/glew-cmake.git
+[submodule "libs/recast"]
+	path = libs/recast
+	url = https://github.com/madyanov/recastnavigation

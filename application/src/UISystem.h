@@ -19,4 +19,7 @@ private:
   UIContext &m_ui_context;
   WindowContext &m_window_context;
   RenderingContext &m_rendering_context;
+
+  void rendering_window(Timestep frame_time) const;
+  void geodata_window() const;
 };

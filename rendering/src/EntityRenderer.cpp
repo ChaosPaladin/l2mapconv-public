@@ -54,7 +54,9 @@ void EntityRenderer::render(const EntityTree &tree,
             const auto &aabb = entity->aabb();
 
             // Frustum culling.
-            if (!aabb.is_zero() && !frustum.intersects(aabb)) {
+            if (settings.culling && !aabb.is_zero() &&
+                !frustum.intersects(aabb)) {
+
               continue;
             }
 

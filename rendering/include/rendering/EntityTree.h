@@ -28,6 +28,8 @@ public:
                                      const Entity *, const MeshSurface *>>>>>>;
 
   void add(const Entity &entity);
+  void remove(std::uint64_t surface_filter);
+
   auto tree() const -> const Tree &;
 
 private:

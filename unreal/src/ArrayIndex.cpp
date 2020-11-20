@@ -17,7 +17,7 @@ auto operator>>(Archive &archive, ArrayIndex &array_index) -> Archive & {
   if ((byte & 0x80) != 0) {
     archive >> byte;
     array_index.value |= static_cast<std::uint32_t>(byte) << 8;
-  } else if ((byte & 0xC0) != 0) {
+  } else if ((byte & 0xc0) != 0) {
     archive >> byte;
     array_index.value |= static_cast<std::uint32_t>(byte) << 8;
     archive >> byte;

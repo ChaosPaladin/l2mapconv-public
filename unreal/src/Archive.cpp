@@ -5,10 +5,10 @@
 
 namespace unreal {
 
-Archive::Archive(const ArchiveLoader &archive_loader, Name name,
-                 std::stringstream input, NameTable &name_table)
+Archive::Archive(const std::string &name, std::stringstream input,
+                 const ArchiveLoader &archive_loader)
     : object_loader{*this, archive_loader}, property_extractor{*this},
-      name{name}, m_input{std::move(input)}, m_name_table{name_table} {
+      name{m_name_table.name(name)}, m_input{std::move(input)} {
 
   *this >> header;
 
@@ -104,7 +104,7 @@ auto Archive::operator>>(Index &index) -> Archive & {
   *this >> byte;
 
   const auto negative = (byte & (1 << 7)) != 0;
-  auto value = byte & 0x3F;
+  auto value = byte & 0x3f;
 
   if ((byte & (1 << 6)) != 0) {
     auto shift = 6;
@@ -112,7 +112,7 @@ auto Archive::operator>>(Index &index) -> Archive & {
     do {
       auto data = 0;
       *this >> byte;
-      data = byte & 0x7F;
+      data = byte & 0x7f;
       data <<= shift;
       value |= data;
       shift += 7;

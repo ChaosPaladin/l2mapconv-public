@@ -9,7 +9,7 @@ static constexpr std::streamsize VERSION_SIZE = 6;
 
 // "Lineage2Ver" string
 static constexpr std::array<char, LINEAGE_SIZE> LINEAGE_HEADER = {
-    0x4C, 0x00, 0x69, 0x00, 0x6E, 0x00, 0x65, 0x00, 0x61, 0x00, 0x67,
+    0x4c, 0x00, 0x69, 0x00, 0x6e, 0x00, 0x65, 0x00, 0x61, 0x00, 0x67,
     0x00, 0x65, 0x00, 0x32, 0x00, 0x56, 0x00, 0x65, 0x00, 0x72, 0x00};
 
 void Decryptor::decrypt(const std::filesystem::path &path,
@@ -26,12 +26,10 @@ void Decryptor::decrypt(const std::filesystem::path &path,
   switch (version.value()) {
   case 111: {
     decrypt_v111(input, output);
-    break;
-  }
+  } break;
   case 121: {
     decrypt_v121(input, output, path);
-    break;
-  }
+  } break;
   default: {
     ASSERT(false, "Unreal",
            "Unsupported Linage 2 encryption version: " << version.value());
@@ -74,7 +72,7 @@ void Decryptor::decrypt_xor(std::istream &input, std::ostream &output,
 }
 
 void Decryptor::decrypt_v111(std::istream &input, std::ostream &output) {
-  decrypt_xor(input, output, 0xAC);
+  decrypt_xor(input, output, 0xac);
 }
 
 void Decryptor::decrypt_v121(std::istream &input, std::ostream &output,
