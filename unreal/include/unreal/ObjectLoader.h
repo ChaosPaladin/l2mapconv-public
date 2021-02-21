@@ -25,9 +25,8 @@ public:
   auto load_object(const ObjectImport &import) const -> std::shared_ptr<Object>;
   auto load_object(Index index) const -> std::shared_ptr<Object>;
 
-  template <typename T>
-  void load_objects(const std::string &class_name,
-                    std::vector<std::shared_ptr<T>> &objects) const;
+  auto export_object(ObjectExport &object_export) const
+      -> std::shared_ptr<Object>;
 
   friend auto operator<<(std::ostream &output,
                          const ObjectLoader &object_loader) -> std::ostream &;
@@ -35,24 +34,8 @@ public:
 private:
   Archive &m_archive;
   const ArchiveLoader &m_archive_loader;
-
-  auto export_object(ObjectExport &object_export) const
-      -> std::shared_ptr<Object>;
 };
 
 #include "Archive.h"
-
-template <typename T>
-void ObjectLoader::load_objects(
-    const std::string &class_name,
-    std::vector<std::shared_ptr<T>> &objects) const {
-
-  for (auto &object_export : m_archive.export_map) {
-    if (object_export.class_name == class_name) {
-      objects.push_back(
-          std::dynamic_pointer_cast<T>(export_object(object_export)));
-    }
-  }
-}
 
 } // namespace unreal

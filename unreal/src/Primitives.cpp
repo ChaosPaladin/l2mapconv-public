@@ -21,9 +21,9 @@ auto operator>>(Archive &archive, Plane &plane) -> Archive & {
 }
 
 auto Rotator::vector() const -> Vector {
-  return {-roll * (std::numbers::pi_v<float>) / 32768.0f,
-          -pitch * (std::numbers::pi_v<float>) / 32768.0f,
-          yaw * (std::numbers::pi_v<float>) / 32768.0f};
+  return {(-roll * static_cast<float>(M_PI)) / 32768.0f,
+          (-pitch * static_cast<float>(M_PI)) / 32768.0f,
+          (yaw * static_cast<float>(M_PI)) / 32768.0f};
 }
 
 auto operator>>(Archive &archive, Rotator &rotator) -> Archive & {

@@ -11,7 +11,7 @@ uniform vec3 u_color;
 uniform vec3 u_camera;
 
 void main() {
-    vec3 texture = vec3(texture2D(u_texture, v_uv));
+    vec3 texture = vec3(texture(u_texture, v_uv));
     vec3 color = texture + u_color;
 
     vec3 normal = v_normal;

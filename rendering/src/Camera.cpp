@@ -36,7 +36,7 @@ auto Camera::projection_matrix() const -> glm::mat4 {
 }
 
 auto Camera::frustum() const -> math::Frustum {
-  return math::Frustum{projection_matrix() * view_matrix()};
+  return math::Frustum{projection_matrix(), view_matrix()};
 }
 
 } // namespace rendering

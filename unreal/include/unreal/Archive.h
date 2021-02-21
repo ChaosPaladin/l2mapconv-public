@@ -88,9 +88,9 @@ public:
 
   PackageHeader header;
 
-  std::vector<Name> name_map;
-  std::vector<ObjectImport> import_map;
-  std::vector<ObjectExport> export_map;
+  mutable std::vector<Name> name_map;
+  mutable std::vector<ObjectImport> import_map;
+  mutable std::vector<ObjectExport> export_map;
 
   explicit Archive(const std::string &name, std::stringstream input,
                    const ArchiveLoader &archive_loader);
@@ -133,6 +133,18 @@ public:
   template <typename T> auto operator>>(std::vector<T> &vector) -> Archive & {
     *this >> extract_array<Index, T>(vector);
     return *this;
+  }
+
+  template <typename T>
+  void load_objects(const std::string &class_name,
+                    std::vector<std::shared_ptr<T>> &objects) const {
+
+    for (auto &object_export : export_map) {
+      if (object_export.class_name == class_name) {
+        objects.push_back(std::dynamic_pointer_cast<T>(
+            object_loader.export_object(object_export)));
+      }
+    }
   }
 
   void dump(int line_count = 64, int line_length = 24);

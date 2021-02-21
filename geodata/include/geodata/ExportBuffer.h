@@ -34,7 +34,7 @@ public:
   auto cell(int x, int y, int cx = 0, int cy = 0, int layer = 0) const -> Cell;
 
   void set_block_type(int x, int y, BlockType type);
-  void set_block_height(int x, int y, int height);
+  void set_block_height(int x, int y, std::int16_t height);
 
 private:
   std::vector<Block> m_blocks;

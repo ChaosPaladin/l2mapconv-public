@@ -59,7 +59,6 @@
 #include <iterator>
 #include <memory>
 #include <mutex>
-#include <numbers>
 #include <sstream>
 #include <thread>
 #include <utility>

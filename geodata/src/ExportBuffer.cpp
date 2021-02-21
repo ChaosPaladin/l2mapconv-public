@@ -14,8 +14,9 @@ static constexpr auto MAX_LAYERS = 64;
 
 ExportBuffer::ExportBuffer()
     : m_blocks{MAP_WIDTH_BLOCKS * MAP_HEIGHT_BLOCKS},
-      m_columns{MAP_WIDTH_CELLS * MAP_HEIGHT_CELLS},
-      m_cells(MAP_WIDTH_CELLS * MAP_HEIGHT_CELLS * MAX_LAYERS) {}
+      m_columns{MAP_WIDTH_CELLS * MAP_HEIGHT_CELLS}, m_cells{MAP_WIDTH_CELLS *
+                                                             MAP_HEIGHT_CELLS *
+                                                             MAX_LAYERS} {}
 
 void ExportBuffer::reset(const Geodata &geodata) {
   std::fill(m_blocks.begin(), m_blocks.end(), Block{});
@@ -71,10 +72,11 @@ void ExportBuffer::set_block_type(int x, int y, BlockType type) {
   m_blocks[block_index].type = type;
 }
 
-void ExportBuffer::set_block_height(int x, int y, int height) {
+void ExportBuffer::set_block_height(int x, int y, std::int16_t height) {
   const auto column_index =
       (y * BLOCK_HEIGHT_CELLS) + (x * BLOCK_WIDTH_CELLS) * MAP_WIDTH_CELLS;
-  m_cells[column_index].height = height;
+  const auto cell_index = column_index * MAX_LAYERS;
+  m_cells[cell_index].height = height;
 }
 
 auto ExportBuffer::pack_cell(const Cell &cell) const -> PackedCell {

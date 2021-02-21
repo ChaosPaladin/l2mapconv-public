@@ -147,7 +147,7 @@ void L2JSerializer::write_complex_block_cell(std::ostream &output,
 void L2JSerializer::round_height(std::int16_t &height) const {
   // Round cell height to fit 12 bits (other 4 bits for NSWE).
   if (height % CELL_HEIGHT != 0) {
-    height = (height / CELL_HEIGHT - 1) * CELL_HEIGHT;
+    height = (height / CELL_HEIGHT) * CELL_HEIGHT;
   }
 }
 

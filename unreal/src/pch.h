@@ -6,6 +6,9 @@
 #include <utils/NonCopyable.h>
 #include <utils/StreamDump.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include <array>
 #include <bitset>
 #include <cctype>
@@ -16,7 +19,6 @@
 #include <iostream>
 #include <limits>
 #include <memory>
-#include <numbers>
 #include <optional>
 #include <sstream>
 #include <string>

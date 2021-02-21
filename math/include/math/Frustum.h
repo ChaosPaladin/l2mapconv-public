@@ -10,8 +10,8 @@ namespace math {
 
 class Frustum {
 public:
-  // matrix = projection_matrix * view_matrix
-  explicit Frustum(const glm::mat4 &matrix);
+  explicit Frustum(const glm::mat4 &projection_matrix,
+                   const glm::mat4 &view_matrix);
 
   auto intersects(const Box &box) const -> bool;
 

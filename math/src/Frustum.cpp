@@ -2,8 +2,11 @@
 
 namespace math {
 
-Frustum::Frustum(const glm::mat4 &matrix) : m_planes{} {
-  const auto transposed = glm::transpose(matrix);
+Frustum::Frustum(const glm::mat4 &projection_matrix,
+                 const glm::mat4 &view_matrix)
+    : m_planes{} {
+
+  const auto transposed = glm::transpose(projection_matrix * view_matrix);
 
   m_planes[0] = transposed[3] + transposed[0];
   m_planes[1] = transposed[3] - transposed[0];

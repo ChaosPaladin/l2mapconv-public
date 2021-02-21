@@ -136,8 +136,9 @@ void Application::build(const std::filesystem::path &root_path,
         geodata_context, nullptr, root_path, {map_name}};
     GeodataSystem geodata_system{geodata_context, ui_context, nullptr};
 
-    ui_context.geodata.export_ = true;
     ui_context.geodata.set_defaults();
+
+    ui_context.geodata.export_ = true;
     ui_context.geodata.build_handler();
   }
 

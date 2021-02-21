@@ -15,16 +15,10 @@ public:
   explicit Package(Archive &archive) : m_archive{archive} {}
 
   template <typename T>
-  auto load_object(const std::string &name) const -> std::shared_ptr<T> {
-    return std::dynamic_pointer_cast<T>(
-        m_archive.object_loader.load_object(name));
-  }
-
-  template <typename T>
   void load_objects(const std::string &class_name,
                     std::vector<std::shared_ptr<T>> &objects) const {
 
-    m_archive.object_loader.load_objects(class_name, objects);
+    m_archive.load_objects(class_name, objects);
   }
 
   auto name() const -> std::string { return std::string{m_archive.name}; }

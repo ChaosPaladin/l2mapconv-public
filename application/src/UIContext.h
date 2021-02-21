@@ -34,7 +34,7 @@ struct UIContext {
       walkable_height = 46.0f;
       wall_angle = 87.5f;
       walkable_angle = 45.0f;
-      min_walkable_climb = 10.0f;
+      min_walkable_climb = 12.0f;
       max_walkable_climb = 16.0f;
     }
   } geodata;
